@@ -21,4 +21,4 @@ value. The sensor will output minimum value, if it sees otherwise.
 How the mod works:
 
 
-If the last value is less than 1/4 of (num_sensors-1)*1000, it returns min value. If the value is greater than 3/4 of (num_sensors-1)*1000, it returns max value. Returns (num_sensors-1)*1000/2 when the value is between 1/4th and 3/4th.
+If the last value is less than 1/4 of (num_sensors-1)*1000 , it returns min value. If the value is greater than 3/4 of (num_sensors-1)*1000 , it returns max value. Returns (num_sensors-1)*1000/2 when the value is between 1/4th and 3/4th.
