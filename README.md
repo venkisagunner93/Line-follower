@@ -18,7 +18,7 @@ How it actually works:
 If the last value from the line sensor is to the right of (num_sensors-1)*1000/2, the current sensor value will be the maximum
 value. The sensor will output minimum value, if it sees otherwise.
 
-Modification:
+How the mod works:
 
 If the last value from the line sensor is to the right of 3/4 of (num_sensors-1)*1000, the sensor value will be maximum and 
 minimum when the last value is to the left of 1/4 of (num_sensors-1)*1000. If it is between 1/4th and 3/4th it returns 
