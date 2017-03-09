@@ -1,13 +1,15 @@
 #include <QTRSensors.h>
 
-#define NUM_SENSORS 8
-#define TIMEOUT 2500
-#define EMITTER_PIN 9
-#define MAX_SPEED 200
+#define NUM_SENSORS 8 // defining number of sensors used
+#define TIMEOUT 2500 // sensor timeout
+#define EMITTER_PIN 9 // LEDON pin in the sensor
+#define MAX_SPEED 200 
 #define BASE_SPEED 75
-#define Ts 10
+#define Ts 10 // sampling time: 10ms + some change (code loop time) ~= 10ms
 
 int BUZZ = 4;
+
+// motor pins
 int EL = 10;
 int ER = 11;
 int ML = 12;
@@ -18,6 +20,7 @@ int set_point = (NUM_SENSORS-1)*500;
 int error = 0;
 int last_error = 0;
 
+// controller gains
 float Kp = 0.1;
 float Ki = 0;
 float Kd = 0;
@@ -32,6 +35,7 @@ int control_output = 0;
 int left_motor_pwm;
 int right_motor_pwm;
 
+// bound for anti-integral windup
 float bound = 0;
 
 // initialize qtrrc object based on the sensor pins and calibration specifications
@@ -94,6 +98,7 @@ void loop() {
   left_motor_pwm = BASE_SPEED + control_output;
   right_motor_pwm = BASE_SPEED - control_output;
 
+// band limiting motor PWM values
   if(left_motor_pwm >= MAX_SPEED){
     digitalWrite(ML,HIGH);
     left_motor_pwm = MAX_SPEED;  
@@ -126,6 +131,7 @@ void loop() {
     digitalWrite(MR,HIGH);  
   }
 
+// send PWM values to motors
   analogWrite(EL,left_motor_pwm);
   analogWrite(ER,right_motor_pwm);
   delay(Ts);
