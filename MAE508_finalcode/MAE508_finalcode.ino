@@ -101,16 +101,17 @@ void loop() {
   if (sample != -1)
   {
     sampleBuffer[sampleBufferIndex] = sample;
+    lastSample = sample;
   }
   else{
     sampleBuffer[sampleBufferIndex] = lastSample;
+    lastSample = 3500;
   }
 
   position = averagePosition(sampleBuffer);
 
   sampleBufferIndex++;
   sampleBufferIndex %= SAMPLE_BUFFER_SIZE;
-  lastSample = sample;
 
   error = set_point - position;
 
