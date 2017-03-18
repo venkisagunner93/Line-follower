@@ -79,6 +79,12 @@ void setup() {
   delay(500);
 
 //  Serial.begin(9600);
+// Initialize Buffer
+for(int i = 0; i < SAMPLE_BUFFER_SIZE; i++)
+{
+  sampleBuffer[i] = 3500;
+}
+
 }
 
 void loop() {
