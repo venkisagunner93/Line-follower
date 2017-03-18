@@ -359,15 +359,16 @@ int QTRSensors::readLine(unsigned int *sensor_values,
     if(!on_line)
     {
         // If it last read to the left of center, return 0.
-        if(_lastValue < (_numSensors-1)*1000/4)
-            return 0;
+        //if(_lastValue < (_numSensors-1)*1000/4)
+        //    return 0;
 
         // If it last read to the right of center, return the max.
-        else if(_lastValue > (_numSensors-1)*3000/4)
-            return (_numSensors-1)*1000;
+        //else if(_lastValue > (_numSensors-1)*3000/4)
+        //    return (_numSensors-1)*1000;
 
-        else
-        	return (_numSensors-1)*1000/2;
+        //else
+       // 	return (_numSensors-1)*1000/2;
+       return -1;
     }
 
     _lastValue = avg/sum;

@@ -3,9 +3,10 @@
 #define NUM_SENSORS 8 // defining number of sensors used
 #define TIMEOUT 2500 // sensor timeout
 #define EMITTER_PIN 9 // LEDON pin in the sensor
-#define MAX_SPEED 200 
+#define MAX_SPEED 200
 #define BASE_SPEED 75
-#define Ts 10 // sampling time: 10ms + some change (code loop time) ~= 10ms
+//#define Ts 10 // sampling time: 10ms + some change (code loop time) ~= 10ms
+#define SAMPLE_BUFFER_SIZE 10 // Sample Buffer Size
 
 int BUZZ = 4;
 
@@ -35,14 +36,30 @@ int control_output = 0;
 int left_motor_pwm;
 int right_motor_pwm;
 
+int sampleBuffer[SAMPLE_BUFFER_SIZE];
+int sampleBufferIndex = 0;
+int sample = 3500;
+
 // bound for anti-integral windup
 float bound = 0;
 
 // initialize qtrrc object based on the sensor pins and calibration specifications
-QTRSensorsRC qtrrc((unsigned char[]) {0, 1, 2, 3, 5, 6, 7, 8}, NUM_SENSORS, TIMEOUT, EMITTER_PIN); 
+QTRSensorsRC qtrrc((unsigned char[]) {0, 1, 2, 3, 5, 6, 7, 8}, NUM_SENSORS, TIMEOUT, EMITTER_PIN);
 
 // sensor values array for the number of sensors used
 unsigned int sensorValues[NUM_SENSORS];
+
+int averagePosition(int *sampleBuffer)
+{
+  int i;
+  int accum = 0;
+  for(i = 0; i < SAMPLE_BUFFER_SIZE; i++)
+  {
+    accum += sampleBuffer[i];
+  }
+  average = accum/SAMPLE_BUFFER_SIZE;
+  return average;
+}
 
 void setup() {
 // define pin-modes for motors
@@ -53,9 +70,9 @@ void setup() {
 
 // calibrate the sensors for 10 seconds with each read of 25ms
   delay(500);
-  for (int i = 0; i < 400; i++)  
+  for (int i = 0; i < 400; i++)
   {
-    qtrrc.calibrate();       
+    qtrrc.calibrate();
   }
 // honk once the calibration is complete
   digitalWrite(BUZZ, HIGH);
@@ -66,11 +83,32 @@ void setup() {
 
 void loop() {
   if(start_count < 1){
-    delay(5000);   
-    start_count = start_count+1; 
+    delay(5000);
+    start_count = start_count+1;
   }
-  
-  unsigned int position = qtrrc.readLine(sensorValues);
+
+  //unsigned int position = qtrrc.readLine(sensorValues);
+
+  sample = qtrrc.readLine(sensorValues);
+
+  if (sample != -1)
+  {
+    sampleBuffer[sampleBufferIndex] = sample;
+  }
+  else{
+    if(sampleBufferIndex != 0){
+      sampleBuffer[sampleBufferIndex] = sampleBuffer[sampleBufferIndex - 1];
+    }
+    else{
+      sampleBuffer[sampleBufferIndex] = 3500;
+    }
+  }
+  position = averagePosition(sampleBuffer);
+
+  if(sampleBufferIndex%SAMPLE_BUFFER_SIZE == 0){
+    sampleBufferIndex = 0;
+  }
+
   error = set_point - position;
 
 // proportional output
@@ -81,10 +119,10 @@ void loop() {
     integral_error = bound;
   }
   else if(integral_error < -bound){
-    integral_error = -bound;  
+    integral_error = -bound;
   }
   else{
-    integral_error = integral_error + error;  
+    integral_error = integral_error + error;
   }
   integral_output = Ki*integral_error;
 
@@ -101,7 +139,7 @@ void loop() {
 // band limiting motor PWM values
   if(left_motor_pwm >= MAX_SPEED){
     digitalWrite(ML,HIGH);
-    left_motor_pwm = MAX_SPEED;  
+    left_motor_pwm = MAX_SPEED;
   }
   else if(left_motor_pwm <= -MAX_SPEED){
     digitalWrite(ML,LOW);
@@ -112,12 +150,12 @@ void loop() {
     left_motor_pwm = -left_motor_pwm;
   }
   else{
-    digitalWrite(ML,HIGH);  
+    digitalWrite(ML,HIGH);
   }
 
   if(right_motor_pwm >= MAX_SPEED){
     digitalWrite(MR,HIGH);
-    right_motor_pwm = MAX_SPEED;  
+    right_motor_pwm = MAX_SPEED;
   }
   else if(right_motor_pwm <= -MAX_SPEED){
     digitalWrite(MR,LOW);
@@ -128,11 +166,11 @@ void loop() {
     right_motor_pwm = -right_motor_pwm;
   }
   else{
-    digitalWrite(MR,HIGH);  
+    digitalWrite(MR,HIGH);
   }
 
 // send PWM values to motors
   analogWrite(EL,left_motor_pwm);
   analogWrite(ER,right_motor_pwm);
-  delay(Ts);
+  //delay(Ts);
 }
