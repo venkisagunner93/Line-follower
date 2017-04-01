@@ -32,6 +32,8 @@ float integral_output = 0;
 float derivative_error = 0;
 float derivative_output = 0;
 
+float avgPosition = 0;
+
 int control_output = 0;
 int left_motor_pwm;
 int right_motor_pwm;
@@ -102,13 +104,28 @@ void loop() {
   {
     sampleBuffer[sampleBufferIndex] = sample;
     lastSample = sample;
+    position = sample;
   }
-  else{
+  else
+  {
     sampleBuffer[sampleBufferIndex] = lastSample;
     lastSample = 3500;
-  }
 
-  position = averagePosition(sampleBuffer);
+    avgPosition = averagePosition(sampleBuffer);
+
+    if (avgPosition > 3750)
+    {
+        position = 7000;
+    }
+    else if (avgPosition < 3250)
+    {
+        position = 0;
+    }
+    else
+    {
+        position = 3500;
+    }
+  }
 
   sampleBufferIndex++;
   sampleBufferIndex %= SAMPLE_BUFFER_SIZE;
@@ -176,5 +193,4 @@ void loop() {
 // send PWM values to motors
   analogWrite(EL,left_motor_pwm);
   analogWrite(ER,right_motor_pwm);
-  delay(Ts);
 }
