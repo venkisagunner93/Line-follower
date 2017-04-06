@@ -3,10 +3,10 @@
 #define NUM_SENSORS 8 // defining number of sensors used
 #define TIMEOUT 2500 // sensor timeout
 #define EMITTER_PIN 9 // LEDON pin in the sensor
-#define MAX_SPEED 200
+#define MAX_SPEED 255
 #define BASE_SPEED 75
 #define Ts 10 // sampling time: 10ms + some change (code loop time) ~= 10ms
-#define SAMPLE_BUFFER_SIZE 10 // Sample Buffer Size
+#define SAMPLE_BUFFER_SIZE 25 // Sample Buffer Size
 
 int BUZZ = 4;
 
@@ -113,11 +113,11 @@ void loop() {
 
     avgPosition = averagePosition(sampleBuffer);
 
-    if (avgPosition > 3750)
+    if (avgPosition > 3600)
     {
         position = 7000;
     }
-    else if (avgPosition < 3250)
+    else if (avgPosition < 3400)
     {
         position = 0;
     }
@@ -193,4 +193,5 @@ void loop() {
 // send PWM values to motors
   analogWrite(EL,left_motor_pwm);
   analogWrite(ER,right_motor_pwm);
+  delay(Ts);
 }
