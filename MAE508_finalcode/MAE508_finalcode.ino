@@ -3,10 +3,10 @@
 #define NUM_SENSORS 8 // defining number of sensors used
 #define TIMEOUT 2500 // sensor timeout
 #define EMITTER_PIN 9 // LEDON pin in the sensor
-#define MAX_SPEED 200
-#define BASE_SPEED 75
-#define Ts 10 // sampling time: 10ms + some change (code loop time) ~= 10ms
-#define SAMPLE_BUFFER_SIZE 10 // Sample Buffer Size
+#define MAX_SPEED 225
+#define BASE_SPEED 100
+#define Ts 1 // sampling time: 10ms + some change (code loop time) ~= 10ms
+#define SAMPLE_BUFFER_SIZE 250 // Sample Buffer Size
 
 int BUZZ = 4;
 
@@ -80,8 +80,8 @@ void setup() {
     qtrrc.calibrate();
   }
 // honk once the calibration is complete
-  digitalWrite(BUZZ, HIGH);
-  delay(500);
+//  digitalWrite(BUZZ, HIGH);
+//  delay(500);
 
 //  Serial.begin(9600);
 // Initialize Buffer
@@ -93,10 +93,6 @@ for(int i = 0; i < SAMPLE_BUFFER_SIZE; i++)
 }
 
 void loop() {
-  if(start_count < 1){
-    delay(5000);
-    start_count = start_count+1;
-  }
 
   sample = qtrrc.readLine(sensorValues);
 
@@ -108,8 +104,8 @@ void loop() {
   }
   else
   {
-    sampleBuffer[sampleBufferIndex] = lastSample;
-    lastSample = 3500;
+      sampleBuffer[sampleBufferIndex] = lastSample;
+      lastSample = 3500;
 
     avgPosition = averagePosition(sampleBuffer);
 
@@ -180,7 +176,7 @@ void loop() {
   }
   else if(right_motor_pwm <= -MAX_SPEED){
     digitalWrite(MR,LOW);
-    right_motor_pwm = MAX_SPEED;
+    right_motor_pwm = MAX_SPEED;    
   }
   else if(right_motor_pwm <= 0 && right_motor_pwm >= -MAX_SPEED){
     digitalWrite(MR,LOW);
@@ -193,4 +189,5 @@ void loop() {
 // send PWM values to motors
   analogWrite(EL,left_motor_pwm);
   analogWrite(ER,right_motor_pwm);
+  delay(Ts);
 }
