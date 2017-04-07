@@ -32,7 +32,7 @@ float integral_output = 0;
 float derivative_error = 0;
 float derivative_output = 0;
 
-float avgPosition = 0;
+float buffPos = 0;
 
 int control_output = 0;
 int left_motor_pwm;
@@ -53,17 +53,38 @@ QTRSensorsRC qtrrc((unsigned char[]) {0, 1, 2, 3, 5, 6, 7, 8}, NUM_SENSORS, TIME
 // sensor values array for the number of sensors used
 unsigned int sensorValues[NUM_SENSORS];
 
-int averagePosition(int *sampleBuffer)
+int bufferPosition(int *sampleBuffer)
 {
   int i;
-  double accum = 0;
-  int average = 0;
+  int max = 3500;
+  int min = 3500;
+  int pos = 3500;
+  int maxThreshold = 3800;
+  int minThreshold = 3200;
   for(i = 0; i < SAMPLE_BUFFER_SIZE; i++)
   {
-    accum += sampleBuffer[i];
+    if (sampleBuffer[i] > max)
+    {
+        max = sampleBuffer[i];
+    }
+    if (sampleBuffer[i] < min)
+    {
+        min = sampleBuffer[i];
+    }
   }
-  average = accum/SAMPLE_BUFFER_SIZE;
-  return average;
+  if (max >= maxThreshold && min > minThreshold)
+  {
+      pos = 7000;
+  }
+  else if(min <= minThreshold && max < maxThreshold)
+  {
+      pos = 0;
+  }
+  else
+  {
+      pos = 3500;
+  }
+  return pos;
 }
 
 void setup() {
@@ -101,30 +122,18 @@ void loop() {
     sampleBuffer[sampleBufferIndex] = sample;
     lastSample = sample;
     position = sample;
+    
+    sampleBufferIndex++;
+    sampleBufferIndex %= SAMPLE_BUFFER_SIZE;
   }
   else
   {
-      sampleBuffer[sampleBufferIndex] = lastSample;
-      lastSample = 3500;
+    sampleBuffer[sampleBufferIndex] = lastSample;
+    lastSample = 3500;
 
-    avgPosition = averagePosition(sampleBuffer);
+    position = bufferPosition(sampleBuffer);
 
-    if (avgPosition > 3750)
-    {
-        position = 7000;
-    }
-    else if (avgPosition < 3250)
-    {
-        position = 0;
-    }
-    else
-    {
-        position = 3500;
-    }
   }
-
-  sampleBufferIndex++;
-  sampleBufferIndex %= SAMPLE_BUFFER_SIZE;
 
   error = set_point - position;
 
