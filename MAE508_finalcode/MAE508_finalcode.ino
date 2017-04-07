@@ -128,8 +128,6 @@ void loop() {
   }
   else
   {
-    sampleBuffer[sampleBufferIndex] = lastSample;
-    lastSample = 3500;
 
     position = bufferPosition(sampleBuffer);
 
