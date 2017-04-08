@@ -56,7 +56,7 @@ unsigned int sensorValues[NUM_SENSORS];
 int averagePosition(int *sampleBuffer)
 {
   int i;
-  double accum = 0;
+  long accum = 0;
   int average = 0;
   for(i = 0; i < SAMPLE_BUFFER_SIZE; i++)
   {

@@ -322,8 +322,7 @@ int QTRSensors::readLine(unsigned int *sensor_values,
 
     readCalibrated(sensor_values, readMode);
 
-    avg = 0;
-    sum = 0;
+    val = 0;
 
     for(i=0;i<_numSensors;i++) {
         int value = sensor_values[i];
@@ -335,11 +334,55 @@ int QTRSensors::readLine(unsigned int *sensor_values,
             on_line = 1;
         }
 
-        // only average in values that are above a noise threshold
-        if(value > 50) {
-            avg += (long)(value) * (i * 1000);
-            sum += value;
-        }
+    }
+    
+    if (sensor_values[0] > 200 && sensor_values[7] < 200)
+    {
+        val = 0;
+    }
+    else if (sensor_values[7] > 200 && sensor_values[0] < 200)
+    {
+        val = 7000;
+    }
+    else if (sensor_values[0] > 200 && sensor_values[7] > 200)
+    {
+        val = 3500;
+    }
+    if (sensor_values[1] > 200 && sensor_values[6] < 200)
+    {
+        val = 1000;
+    }
+    else if (sensor_values[6] > 200 && sensor_values[1] < 200)
+    {
+        val = 6000;
+    }
+    else if (sensor_values[1] > 200 && sensor_values[6] > 200)
+    {
+        val = 3500;
+    }
+        if (sensor_values[2] > 200 && sensor_values[5] < 200)
+    {
+        val = 2000;
+    }
+    else if (sensor_values[5] > 200 && sensor_values[2] < 200)
+    {
+        val = 5000;
+    }
+    else if (sensor_values[2] > 200 && sensor_values[5] > 200)
+    {
+        val = 3500;
+    }
+        if (sensor_values[3] > 200 && sensor_values[4] < 200)
+    {
+        val = 3000;
+    }
+    else if (sensor_values[4] > 200 && sensor_values[3] < 200)
+    {
+        val = 4000;
+    }
+    else
+    {
+        val = 3500;
     }
 
     // if(!on_line)
@@ -371,7 +414,7 @@ int QTRSensors::readLine(unsigned int *sensor_values,
        return -1;
     }
 
-    _lastValue = avg/sum;
+    _lastValue = val;
 
     return _lastValue;
 }
