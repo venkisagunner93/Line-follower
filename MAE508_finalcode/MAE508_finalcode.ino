@@ -39,7 +39,7 @@ int right_motor_pwm;
 float bound = 0;
 
 // initialize qtrrc object based on the sensor pins and calibration specifications
-QTRSensorsRC qtrrc((unsigned char[]) {0, 1, 2, 3, 5, 6, 7, 8}, NUM_SENSORS, TIMEOUT, EMITTER_PIN); 
+QTRSensorsRC qtrrc((unsigned char[]) {8, 7, 6, 5, 3, 2, 1, 0}, NUM_SENSORS, TIMEOUT, EMITTER_PIN); 
 
 // sensor values array for the number of sensors used
 unsigned int sensorValues[NUM_SENSORS];
