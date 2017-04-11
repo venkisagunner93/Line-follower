@@ -3,9 +3,9 @@
 #define NUM_SENSORS 8 // defining number of sensors used
 #define TIMEOUT 2500 // sensor timeout
 #define EMITTER_PIN 9 // LEDON pin in the sensor
-#define MAX_SPEED 200 
-#define BASE_SPEED 75
-#define Ts 10 // sampling time: 10ms + some change (code loop time) ~= 10ms
+#define MAX_SPEED 255 
+#define BASE_SPEED 125
+#define Ts 1 // sampling time: 10ms + some change (code loop time) ~= 10ms
 
 int BUZZ = 4;
 
@@ -21,7 +21,7 @@ int error = 0;
 int last_error = 0;
 
 // controller gains
-float Kp = 0.1;
+float Kp = 0.2;
 float Ki = 0;
 float Kd = 0;
 
