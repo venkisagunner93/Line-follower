@@ -4,10 +4,9 @@
 #define TIMEOUT 2500 // sensor timeout
 #define EMITTER_PIN 9 // LEDON pin in the sensor
 #define MAX_SPEED 255
-#define BASE_SPEED 100 // WORKING, MISSING GAP
-#define Ts 10 // sampling time: 10ms + some change (code loop time) ~= 10ms
-//#define SAMPLE_BUFFER_SIZE 25 // Sample Buffer Size
-#define SAMPLE_BUFFER_SIZE 50 // BEST SIZE SO FAR
+#define BASE_SPEED 125
+#define Ts 5 // sampling time: 10ms + some change (code loop time) ~= 10ms
+#define SAMPLE_BUFFER_SIZE 40 // BEST SIZE SO FAR
 
 #define MAGIC_BOOST 10
 
@@ -27,7 +26,8 @@ int last_error = 0;
 // controller gains
 float Kp = 0.1;
 float Ki = 0;
-float Kd = 0;
+//float Kd = 0.1;
+float Kd = 0.2;
 
 float proportional_output = 0;
 float integral_error = 0;
