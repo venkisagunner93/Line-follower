@@ -4,9 +4,12 @@
 #define TIMEOUT 2500 // sensor timeout
 #define EMITTER_PIN 9 // LEDON pin in the sensor
 #define MAX_SPEED 255
-#define BASE_SPEED 75
+#define BASE_SPEED 100 // WORKING, MISSING GAP
 #define Ts 10 // sampling time: 10ms + some change (code loop time) ~= 10ms
-#define SAMPLE_BUFFER_SIZE 25 // Sample Buffer Size
+//#define SAMPLE_BUFFER_SIZE 25 // Sample Buffer Size
+#define SAMPLE_BUFFER_SIZE 50 // BEST SIZE SO FAR
+
+#define MAGIC_BOOST 10
 
 int BUZZ = 4;
 
@@ -48,7 +51,8 @@ unsigned int position = 0;
 float bound = 0;
 
 // initialize qtrrc object based on the sensor pins and calibration specifications
-QTRSensorsRC qtrrc((unsigned char[]) {0, 1, 2, 3, 5, 6, 7, 8}, NUM_SENSORS, TIMEOUT, EMITTER_PIN);
+//QTRSensorsRC qtrrc((unsigned char[]) {0, 1, 2, 3, 5, 6, 7, 8}, NUM_SENSORS, TIMEOUT, EMITTER_PIN);
+QTRSensorsRC qtrrc((unsigned char[]) {8, 7, 6, 5, 3, 2, 1, 0}, NUM_SENSORS, TIMEOUT, EMITTER_PIN);
 
 // sensor values array for the number of sensors used
 unsigned int sensorValues[NUM_SENSORS];
@@ -108,16 +112,13 @@ void loop() {
   }
   else
   {
-    sampleBuffer[sampleBufferIndex] = lastSample;
-    lastSample = 3500;
-
     avgPosition = averagePosition(sampleBuffer);
 
-    if (avgPosition > 3600)
+    if (avgPosition > 3700)
     {
         position = 7000;
     }
-    else if (avgPosition < 3400)
+    else if (avgPosition < 3300)
     {
         position = 0;
     }
@@ -184,11 +185,13 @@ void loop() {
   }
   else if(right_motor_pwm <= 0 && right_motor_pwm >= -MAX_SPEED){
     digitalWrite(MR,LOW);
-    right_motor_pwm = -right_motor_pwm;
+    right_motor_pwm = -right_motor_pwm - MAGIC_BOOST;
   }
   else{
+    right_motor_pwm += MAGIC_BOOST;
     digitalWrite(MR,HIGH);
   }
+
 
 // send PWM values to motors
   analogWrite(EL,left_motor_pwm);
