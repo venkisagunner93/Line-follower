@@ -4,8 +4,8 @@
 #define TIMEOUT 2500 // sensor timeout
 #define EMITTER_PIN 9 // LEDON pin in the sensor
 #define MAX_SPEED 255
-#define BASE_SPEED 125
-#define Ts 5 // sampling time: 10ms + some change (code loop time) ~= 10ms
+#define BASE_SPEED 150
+#define Ts 1 // sampling time: 10ms + some change (code loop time) ~= 10ms
 #define SAMPLE_BUFFER_SIZE 40 // BEST SIZE SO FAR
 
 #define MAGIC_BOOST 10
@@ -25,9 +25,9 @@ int last_error = 0;
 
 // controller gains
 float Kp = 0.1;
+//float Ki = 0.000001;
 float Ki = 0;
-//float Kd = 0.1;
-float Kd = 0.2;
+float Kd = 0.4;
 
 float proportional_output = 0;
 float integral_error = 0;
@@ -48,7 +48,7 @@ int lastSample = 3500;
 unsigned int position = 0;
 
 // bound for anti-integral windup
-float bound = 0;
+float bound = 500000;
 
 // initialize qtrrc object based on the sensor pins and calibration specifications
 //QTRSensorsRC qtrrc((unsigned char[]) {0, 1, 2, 3, 5, 6, 7, 8}, NUM_SENSORS, TIMEOUT, EMITTER_PIN);
@@ -114,11 +114,11 @@ void loop() {
   {
     avgPosition = averagePosition(sampleBuffer);
 
-    if (avgPosition > 3700)
+    if (avgPosition > 3800) // 3700 works
     {
         position = 7000;
     }
-    else if (avgPosition < 3300)
+    else if (avgPosition < 3200) //3300 works
     {
         position = 0;
     }
