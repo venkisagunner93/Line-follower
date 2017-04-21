@@ -4,9 +4,9 @@
 #define TIMEOUT 2500 // sensor timeout
 #define EMITTER_PIN 9 // LEDON pin in the sensor
 #define MAX_SPEED 255
-#define BASE_SPEED 150
+#define BASE_SPEED 100
 #define Ts 1 // sampling time: 10ms + some change (code loop time) ~= 10ms
-#define SAMPLE_BUFFER_SIZE 40 // BEST SIZE SO FAR
+#define SAMPLE_BUFFER_SIZE 50 // BEST SIZE SO FAR
 
 #define MAGIC_BOOST 10
 
@@ -41,11 +41,16 @@ int control_output = 0;
 int left_motor_pwm;
 int right_motor_pwm;
 
-int sampleBuffer[SAMPLE_BUFFER_SIZE];
+int leftBuffer[SAMPLE_BUFFER_SIZE];
+int rightBuffer[SAMPLE_BUFFER_SIZE];
 int sampleBufferIndex = 0;
 int sample = 3500;
-int lastSample = 3500;
 unsigned int position = 0;
+int leftMax = 0;
+int rightMax = 0;
+int flagThreshold = 200;
+int calibrateSpeed = 80;
+int calibrateTime = 25;
 
 // bound for anti-integral windup
 float bound = 500000;
@@ -57,17 +62,17 @@ QTRSensorsRC qtrrc((unsigned char[]) {8, 7, 6, 5, 3, 2, 1, 0}, NUM_SENSORS, TIME
 // sensor values array for the number of sensors used
 unsigned int sensorValues[NUM_SENSORS];
 
-int averagePosition(int *sampleBuffer)
+int BufferMax(int *sampleBuffer)
 {
   int i;
-  double accum = 0;
-  int average = 0;
+  int max = 0;
   for(i = 0; i < SAMPLE_BUFFER_SIZE; i++)
   {
-    accum += sampleBuffer[i];
+    if (sampleBuffer[i] > max) {
+      max = sampleBuffer[i];
+    }
   }
-  average = accum/SAMPLE_BUFFER_SIZE;
-  return average;
+  return max;
 }
 
 void setup() {
@@ -76,49 +81,86 @@ void setup() {
   pinMode(MR,OUTPUT);
   pinMode(EL,OUTPUT);
   pinMode(ER,OUTPUT);
+  digitalWrite(ML,LOW);
+  digitalWrite(MR,LOW);
+  analogWrite(EL,0);
+  analogWrite(ER,0);
 
 // calibrate the sensors for 10 seconds with each read of 25ms
-  delay(500);
-  for (int i = 0; i < 400; i++)
+  delay(2000);
+  for (int i = 0; i < 6*calibrateTime; i++)
   {
+    if (i < calibrateTime) {
+      digitalWrite(ML,HIGH);
+      digitalWrite(MR,LOW);
+      analogWrite(EL,calibrateSpeed);
+      analogWrite(ER,calibrateSpeed);
+    }
+    else if (i < 3*calibrateTime) {
+      digitalWrite(ML,LOW);
+      digitalWrite(MR,HIGH);
+      analogWrite(EL,calibrateSpeed);
+      analogWrite(ER,calibrateSpeed);
+    }
+    else if (i < 5*calibrateTime) {
+      digitalWrite(ML,HIGH);
+      digitalWrite(MR,LOW);
+      analogWrite(EL,calibrateSpeed);
+      analogWrite(ER,calibrateSpeed);
+    }
+    else {
+      digitalWrite(ML,LOW);
+      digitalWrite(MR,HIGH);
+      analogWrite(EL,calibrateSpeed);
+      analogWrite(ER,calibrateSpeed);
+    }
     qtrrc.calibrate();
   }
+  digitalWrite(ML,LOW);
+  digitalWrite(MR,LOW);
+  analogWrite(EL,0);
+  analogWrite(ER,0);
 // honk once the calibration is complete
   digitalWrite(BUZZ, HIGH);
-  delay(500);
+  delay(1000);
 
 //  Serial.begin(9600);
 // Initialize Buffer
 for(int i = 0; i < SAMPLE_BUFFER_SIZE; i++)
 {
-  sampleBuffer[i] = 3500;
+  leftBuffer[i] = 0;
+  rightBuffer[i] = 0;
 }
 
 }
 
 void loop() {
-  if(start_count < 1){
-    delay(5000);
-    start_count = start_count+1;
-  }
 
   sample = qtrrc.readLine(sensorValues);
 
   if (sample != -1)
   {
-    sampleBuffer[sampleBufferIndex] = sample;
-    lastSample = sample;
+    leftBuffer[sampleBufferIndex] = sensorValues[0];
+    rightBuffer[sampleBufferIndex] = sensorValues[7];
     position = sample;
+    if (sensorValues[0] > flagThreshold && sensorValues[7] < flagThreshold) {
+      position = 0;
+    }
+    else if (sensorValues[0] < flagThreshold && sensorValues[7] > flagThreshold) {
+
+      position = 7000;
+    }
   }
   else
   {
-    avgPosition = averagePosition(sampleBuffer);
+    leftMax = BufferMax(leftBuffer);
+    rightMax = BufferMax(rightBuffer);
 
-    if (avgPosition > 3800) // 3700 works
+    if (rightMax > flagThreshold && leftMax < flagThreshold) 
     {
         position = 7000;
     }
-    else if (avgPosition < 3200) //3300 works
+    else if (rightMax < flagThreshold && leftMax > flagThreshold)
     {
         position = 0;
     }
