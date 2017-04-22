@@ -4,19 +4,26 @@
 #define TIMEOUT 2500 // sensor timeout
 //#define EMITTER_PIN 9 // LEDON pin in the sensor
 #define MAX_SPEED 255
-#define BASE_SPEED 150
-#define Ts 10 // sampling time: 10ms + some change (code loop time) ~= 10ms
-#define SAMPLE_BUFFER_SIZE 30 // BEST SIZE SO FAR
+#define BASE_SPEED 235
+#define Ts 2 // sampling time: 10ms + some change (code loop time) ~= 10ms
+#define SAMPLE_BUFFER_SIZE 15  // BEST SIZE SO FAR
 
 #define MAGIC_BOOST 10
 
 int BUZZ = 4;
 
 // motor pins
-int EL = 10;
-int ER = 11;
-int ML = 12;
-int MR = 13;
+//int EL = 10;
+//int ER = 11;
+//int ML = 12;
+//int MR = 13;
+
+// This is for the sensor being on other side
+int EL = 11;
+int ER = 10;
+
+int ML = 13;
+int MR = 12;
 
 int start_count = 0;
 int set_point = (NUM_SENSORS-1)*500;
@@ -51,7 +58,7 @@ int rightMax = 0;
 int flagThreshold = 200;
 int flagThreshold1 = 200;
 int calibrateSpeed = 80;
-int calibrateTime = 50;
+int calibrateTime = 40;
 int leftAverage = 0;
 int rightAverage = 0;
 
@@ -106,24 +113,24 @@ void setup() {
   delay(2000);
   for (int i = 0; i < 4*calibrateTime; i++)
   {
-//    if (i < calibrateTime) {
-//      digitalWrite(ML,HIGH);
-//      digitalWrite(MR,LOW);
-//      analogWrite(EL,calibrateSpeed);
-//      analogWrite(ER,calibrateSpeed);
-//    }
-//    else if (i < 3*calibrateTime) {
-//      digitalWrite(ML,LOW);
-//      digitalWrite(MR,HIGH);
-//      analogWrite(EL,calibrateSpeed);
-//      analogWrite(ER,calibrateSpeed);
-//    }
-//    else {
-//      digitalWrite(ML,HIGH);
-//      digitalWrite(MR,LOW);
-//      analogWrite(EL,calibrateSpeed);
-//      analogWrite(ER,calibrateSpeed);
-//    }
+    if (i < calibrateTime) {
+      digitalWrite(ML,HIGH);
+      digitalWrite(MR,LOW);
+      analogWrite(EL,calibrateSpeed);
+      analogWrite(ER,calibrateSpeed);
+    }
+    else if (i < 3*calibrateTime) {
+      digitalWrite(ML,LOW);
+      digitalWrite(MR,HIGH);
+      analogWrite(EL,calibrateSpeed);
+      analogWrite(ER,calibrateSpeed);
+    }
+    else {
+      digitalWrite(ML,HIGH);
+      digitalWrite(MR,LOW);
+      analogWrite(EL,calibrateSpeed);
+      analogWrite(ER,calibrateSpeed);
+    }
     qtrrc.calibrate();
   }
   digitalWrite(ML,LOW);
@@ -231,8 +238,8 @@ void loop() {
 
   control_output = proportional_output + integral_output + derivative_output;
 
-  left_motor_pwm = BASE_SPEED + control_output;
-  right_motor_pwm = BASE_SPEED - control_output;
+  left_motor_pwm = BASE_SPEED - control_output;
+  right_motor_pwm = BASE_SPEED + control_output;
 
 // band limiting motor PWM values
   if(left_motor_pwm >= MAX_SPEED){
