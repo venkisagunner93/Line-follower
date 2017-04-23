@@ -34,7 +34,7 @@ int last_error = 0;
 float Kp = 0.1;
 //float Ki = 0.000001;
 float Ki = 0;
-float Kd = 0.4;
+float Kd = 0.6;
 
 float proportional_output = 0;
 float integral_error = 0;
@@ -57,10 +57,12 @@ int leftMax = 0;
 int rightMax = 0;
 int flagThreshold = 200;
 int flagThreshold1 = 200;
-int calibrateSpeed = 80;
+int calibrateSpeed = 60;
 int calibrateTime = 40;
 int leftAverage = 0;
 int rightAverage = 0;
+int bullshit = 0;
+int bullshitThreshold = 15;
 
 // bound for anti-integral windup
 float bound = 500000;
@@ -111,7 +113,7 @@ void setup() {
 
 // calibrate the sensors for 10 seconds with each read of 25ms
   delay(2000);
-  for (int i = 0; i < 4*calibrateTime; i++)
+  for (int i = 0; i < 5*calibrateTime; i++)
   {
     if (i < calibrateTime) {
       digitalWrite(ML,HIGH);
@@ -132,6 +134,15 @@ void setup() {
       analogWrite(ER,calibrateSpeed);
     }
     qtrrc.calibrate();
+  }
+  sample = qtrrc.readLine(sensorValues,QTR_EMITTERS_ON);
+  while (sample > 4500 || sample < 2500)
+  {
+    digitalWrite(ML,LOW);
+    digitalWrite(MR,HIGH);
+    analogWrite(EL,calibrateSpeed);
+    analogWrite(ER,calibrateSpeed);
+    sample = qtrrc.readLine(sensorValues,QTR_EMITTERS_ON);
   }
   digitalWrite(ML,LOW);
   digitalWrite(MR,LOW);
@@ -161,6 +172,7 @@ void loop() {
 //  Serial.println(sensorValues[7]);  
   if (sample != -1)
   {
+    bullshit = 0;
     leftBuffer[sampleBufferIndex] = sensorValues[0];
     rightBuffer[sampleBufferIndex] = sensorValues[7];
     position = sample;
@@ -205,7 +217,15 @@ void loop() {
     }
     else
     {
+      if (bullshit < bullshitThreshold)
+      {
         position = 3500;
+        bullshit++;
+      }
+      else
+      {
+        position = 0;
+      }
     }
   }
 //  Serial.print("\t");
