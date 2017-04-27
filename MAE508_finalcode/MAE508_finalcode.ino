@@ -4,7 +4,7 @@
 #define TIMEOUT 2500 // sensor timeout
 //#define EMITTER_PIN 9 // LEDON pin in the sensor
 #define MAX_SPEED 255
-#define BASE_SPEED 235
+#define BASE_SPEED 205
 #define Ts 2 // sampling time: 10ms + some change (code loop time) ~= 10ms
 #define SAMPLE_BUFFER_SIZE 15  // BEST SIZE SO FAR
 
@@ -34,7 +34,7 @@ int last_error = 0;
 float Kp = 0.1;
 //float Ki = 0.000001;
 float Ki = 0;
-float Kd = 0.6;
+float Kd = 0.8;
 
 float proportional_output = 0;
 float integral_error = 0;
@@ -61,8 +61,8 @@ int calibrateSpeed = 60;
 int calibrateTime = 40;
 int leftAverage = 0;
 int rightAverage = 0;
-int bullshit = 0;
-int bullshitThreshold = 15;
+int offSetCount = 0;
+int offSetCountThreshold = 10;
 
 // bound for anti-integral windup
 float bound = 500000;
@@ -172,7 +172,7 @@ void loop() {
 //  Serial.println(sensorValues[7]);  
   if (sample != -1)
   {
-    bullshit = 0;
+    offSetCount = 0;
     leftBuffer[sampleBufferIndex] = sensorValues[0];
     rightBuffer[sampleBufferIndex] = sensorValues[7];
     position = sample;
@@ -217,10 +217,10 @@ void loop() {
     }
     else
     {
-      if (bullshit < bullshitThreshold)
+      if (offSetCount < offSetCountThreshold)
       {
         position = 3500;
-        bullshit++;
+        offSetCount++;
       }
       else
       {
