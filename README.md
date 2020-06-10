@@ -3,7 +3,7 @@ Arduino code for a line follower
 
 This is a PID controller for an Arduino based line follower. The code was developed with the following hardware.
 
-1. Arduino UNO microcontroller R3
+1. Arduino UNO microcontroller R3 
 2. QTRRC polulu IR line sensor
 3. SainSmart buck converter
 4. Turnigy Lipo 1800mAh 3S 20C battery
